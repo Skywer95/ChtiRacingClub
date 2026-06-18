@@ -391,18 +391,17 @@ const CSS = `
 
 /* partners */
 .plogos{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:18px 16px;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--text);overflow:hidden}
+.plogo{position:relative;aspect-ratio:3/2;border:1px solid rgba(15,27,45,.08);border-radius:16px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px 18px;transition:transform .25s,box-shadow .25s;text-decoration:none;color:#0f1b2d;overflow:hidden;box-shadow:0 10px 30px -18px rgba(15,27,45,.4)}
 .plogo-bar{position:absolute;top:0;left:0;right:0;height:4px;transform:scaleX(0);transform-origin:left;transition:transform .3s}
-.plogo:hover{transform:translateY(-5px);box-shadow:0 22px 46px -26px rgba(15,27,45,.5)}
+.plogo:hover{transform:translateY(-6px);box-shadow:0 26px 50px -22px rgba(0,0,0,.45)}
 .plogo:hover .plogo-bar{transform:scaleX(1)}
-.plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;transition:.2s}
-.plogo:hover b{color:var(--primary)}
-.plogo small{color:var(--muted);font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
-.plogo-plate{flex:1;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:12px;padding:12px 16px;width:100%;min-height:0;overflow:hidden;box-shadow:0 4px 14px -8px rgba(0,0,0,.25);transition:transform .25s}
+.plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:18px;text-transform:uppercase;color:#0f1b2d}
+.plogo small{color:#7a869a;font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.plogo-plate{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden;transition:transform .25s}
 .plogo img{width:100%;height:100%;object-fit:contain}
-.plogo:hover .plogo-plate{transform:scale(1.04)}
-.plogo-link{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.65;transition:.2s;line-height:1.2}
-.plogo:hover .plogo-link{color:var(--primary);opacity:1}
+.plogo:hover .plogo-plate{transform:scale(1.05)}
+.plogo-link{font-size:9px;font-weight:700;color:#9aa4b4;text-transform:uppercase;letter-spacing:.06em;transition:.2s;line-height:1.2}
+.plogo:hover .plogo-link{color:#0f1b2d}
 .posters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
 .poster{aspect-ratio:3/4;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--border);box-shadow:0 14px 40px -28px rgba(15,27,45,.35);transition:transform .25s,box-shadow .25s}
 .poster:hover{transform:translateY(-4px);box-shadow:0 24px 48px -28px rgba(15,27,45,.45)}
@@ -605,10 +604,7 @@ function PartnerLogo({ p }) {
       if (cnt > 4) setTint(`rgb(${r/cnt|0},${g/cnt|0},${b/cnt|0})`);
     } catch {}
   };
-  const style = tint ? {
-    background: `color-mix(in srgb, ${tint} 14%, var(--card))`,
-    borderColor: `color-mix(in srgb, ${tint} 30%, var(--border))`
-  } : {};
+  const style = {};
   return <a className="plogo" href={p.url} target="_blank" rel="noreferrer" style={style}>
     {tint && <span className="plogo-bar" style={{ background: tint }}/>}
     {p.logo ? <span className="plogo-plate"><img src={p.logo} alt={p.name} loading="lazy" crossOrigin="anonymous" onLoad={onLoad}/></span>
