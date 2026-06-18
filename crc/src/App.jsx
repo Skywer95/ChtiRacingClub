@@ -6,12 +6,11 @@ import {
   Quote, Facebook, Instagram, Youtube, Lock, Sun, Moon, Palette, Handshake,
   Sparkles, Megaphone, Play, Check, Settings, LayoutGrid
 } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
 
 /* ============================================================
    STORAGE SERVICE  — couche isolée. Remplacer par Supabase/Firebase ici.
    ============================================================ */
-import { createClient } from "@supabase/supabase-js";
-
 const supabase = createClient(
   "https://awmrfsyhdwjmysbooitr.supabase.co",
   "sb_publishable_SOf_pu2jKn2EKZ_Uyqjamw_QcwbIfjE"
@@ -434,6 +433,8 @@ const CSS = `
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:12px 22px;border-radius:12px;font-weight:700;z-index:400;box-shadow:0 14px 30px -10px var(--primary)}
 .del{background:#fee2e2;color:#dc2626;border:none;width:34px;height:34px;border-radius:9px;cursor:pointer;display:grid;place-items:center}
 .mini{font-size:12px;color:var(--muted)}
+.filedrop{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;text-align:center;padding:16px;margin-bottom:12px;border:2px dashed var(--border);border-radius:12px;background:var(--section);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
+.filedrop:hover,.filedrop.over{border-color:var(--primary);color:var(--primary);background:var(--soft)}
 
 @media(max-width:900px){
   .nav-links{display:none}
@@ -779,6 +780,36 @@ function Field({ label, value, onChange, type="text", textarea }) {
       : <input type={type} value={value} onChange={e=>onChange(e.target.value)} />}
   </div>;
 }
+const STORAGE_BUCKET = "media";
+async function uploadFile(file) {
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  return supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+function FileDrop({ accept, label, onUploaded }) {
+  const ref = useRef();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [over, setOver] = useState(false);
+  const handle = async (file) => {
+    if (!file) return;
+    setBusy(true); setErr("");
+    try { const url = await uploadFile(file); onUploaded(url, file); }
+    catch (e) { setErr(e.message || "Échec de l'envoi"); }
+    setBusy(false);
+  };
+  return <div className={"filedrop"+(over?" over":"")}
+    onClick={()=>ref.current.click()}
+    onDragOver={e=>{e.preventDefault();setOver(true);}}
+    onDragLeave={()=>setOver(false)}
+    onDrop={e=>{e.preventDefault();setOver(false);handle(e.dataTransfer.files[0]);}}>
+    <input ref={ref} type="file" accept={accept} style={{display:"none"}} onChange={e=>handle(e.target.files[0])}/>
+    <Download size={18}/> {busy ? "Envoi en cours…" : (label || "Glisser un fichier ici, ou cliquer pour parcourir")}
+    {err && <div className="mini" style={{color:"#dc2626",marginTop:6}}>{err}</div>}
+  </div>;
+}
 function MediaEditor({ media, onChange }) {
   const m = media || { type:"image", src:"", fit:"cover", poster:"" };
   const set = (k,v) => onChange({ ...m, [k]:v });
@@ -791,8 +822,13 @@ function MediaEditor({ media, onChange }) {
       <div className="field"><label>Cadrage</label>
         <select value={m.fit} onChange={e=>set("fit",e.target.value)}><option value="cover">Remplir (cover)</option><option value="contain">Entier (contain)</option></select></div>
     </div>
-    <Field label="URL du média" value={m.src} onChange={v=>set("src",v)} />
-    {m.type==="video" && <Field label="Image de couverture (poster)" value={m.poster} onChange={v=>set("poster",v)} />}
+    {m.type!=="youtube" && <FileDrop
+      accept={m.type==="video"?"video/*":"image/*"}
+      label={m.type==="video"?"Glisser une vidéo (MP4/WEBM)":"Glisser une image (JPG/PNG/WEBP)"}
+      onUploaded={(url,file)=>onChange({...m, src:url, type: file.type.startsWith("video")?"video":"image"})}/>}
+    <Field label={m.type==="youtube"?"Lien YouTube/Vimeo":"URL du média (ou collez un lien)"} value={m.src} onChange={v=>set("src",v)} />
+    {m.type==="video" && <><FileDrop accept="image/*" label="Glisser une image de couverture (poster)" onUploaded={url=>set("poster",url)}/>
+      <Field label="URL du poster" value={m.poster} onChange={v=>set("poster",v)} /></>}
     <div style={{ height:120, borderRadius:10, overflow:"hidden" }}><Media media={m} fit={m.fit}/></div>
   </div>;
 }
@@ -953,7 +989,9 @@ function Admin({ data, setData, close }) {
         render={(it,u)=><><div className="adm-grid">
           <Field label="Nom" value={it.name} onChange={v=>u({name:v})}/>
           <Field label="Lien fichier" value={it.url} onChange={v=>u({url:v})}/>
-        </div><Field label="Description" value={it.desc} onChange={v=>u({desc:v})}/></>}/>}
+        </div>
+        <FileDrop label="Glisser un fichier (PDF, etc.)" onUploaded={url=>u({url})}/>
+        <Field label="Description" value={it.desc} onChange={v=>u({desc:v})}/></>}/>}
 
       {sec==="appearance" && <>
         <div className="adm-card"><h3>Mode</h3><div className="chips">
