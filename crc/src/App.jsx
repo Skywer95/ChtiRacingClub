@@ -338,9 +338,10 @@ const CSS = `
 .crew-quote{margin-top:16px;padding:14px 16px;background:var(--soft);border-radius:12px;border-left:3px solid var(--primary);font-style:italic;color:var(--primary);font-weight:600;display:flex;gap:8px}
 
 /* cars */
-.car{display:grid;grid-template-columns:1.2fr 1fr}
-.car .media{height:100%;min-height:300px}
-.car-info{padding:30px}
+.car{display:block}
+.car .media{width:100%;aspect-ratio:16/9;height:auto}
+.car-info{padding:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:0 32px}
+.car-info h3{grid-column:1/-1}
 .car-info h3{font-size:26px;font-style:italic;font-weight:800;text-transform:uppercase;margin-bottom:16px}
 .spec{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);font-size:14.5px}
 .spec span:first-child{color:var(--muted);font-weight:600}
@@ -446,7 +447,8 @@ const CSS = `
   .stat:nth-child(n+3){border-top:1px solid var(--border)}
   .g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}
   .assoc,.car,.contact{grid-template-columns:1fr}
-  .car .media{min-height:240px}
+  .car .media{aspect-ratio:16/10}
+  .car-info{grid-template-columns:1fr}
   .plogos{grid-template-columns:repeat(3,1fr)}
   .masonry{columns:2}
   .adm{grid-template-columns:1fr}
