@@ -283,7 +283,8 @@ const CSS = `
 /* HERO */
 .hero{position:relative;min-height:88vh;display:flex;align-items:center;overflow:hidden}
 .hero-media{position:absolute;inset:0;z-index:0}
-.hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,var(--hero-overlay),transparent 70%)}
+.hero-media .media{position:absolute;inset:0;width:100%;height:100%}
+.hero-media::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,var(--hero-overlay),transparent 70%)}
 .hero-media img,.hero-media video{width:100%;height:100%;object-fit:cover}
 .hero-in{position:relative;z-index:2;color:#fff;max-width:640px;padding:60px 0}
 .hero-eyebrow{color:#fff;opacity:.85}
