@@ -383,6 +383,10 @@ const CSS = `
 .plogo img{max-width:100%;max-height:72px;width:auto;height:auto;object-fit:contain}
 .plogo-link{position:absolute;bottom:7px;left:0;right:0;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.6;transition:.2s}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
+.posters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.poster{aspect-ratio:3/4;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--border);box-shadow:0 14px 40px -28px rgba(15,27,45,.35);transition:transform .25s,box-shadow .25s}
+.poster:hover{transform:translateY(-4px);box-shadow:0 24px 48px -28px rgba(15,27,45,.45)}
+.poster img{width:100%;height:100%;object-fit:cover}
 
 /* documents */
 .doc{padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center}
@@ -453,6 +457,7 @@ const CSS = `
   .car .media{aspect-ratio:16/10}
   .car-info{grid-template-columns:1fr}
   .plogos{grid-template-columns:repeat(3,1fr)}
+  .posters{grid-template-columns:repeat(3,1fr)}
   .masonry{columns:2}
   .adm{grid-template-columns:1fr}
   .adm-side{position:fixed;inset:0;width:240px;z-index:10;transform:translateX(-100%);transition:.25s}
@@ -463,6 +468,7 @@ const CSS = `
   .stats-card{grid-template-columns:1fr}.stat+.stat{border-left:none;border-top:1px solid var(--border)}
   .g4,.g3,.g2{grid-template-columns:1fr}
   .plogos{grid-template-columns:repeat(2,1fr)}
+  .posters{grid-template-columns:repeat(2,1fr)}
   .masonry{columns:1}
   .wrap{padding:0 18px}
 }
@@ -687,6 +693,14 @@ function Site({ data, openAdmin }) {
         </div>
         <p className="mini" style={{ textAlign:"center", margin:"26px 0" }}>{data.partners.footer}</p>
         <div style={{ textAlign:"center" }}><a className="btn btn-primary" onClick={()=>go("contact")}>Devenir partenaire <Handshake size={18}/></a></div>
+        {(data.partners.posters||[]).length>0 && <>
+          <p className="lead" style={{ textAlign:"center", margin:"48px auto 22px" }}>Merci à nos sponsors 🏁</p>
+          <div className="posters">
+            {(data.partners.posters||[]).map(p=><div className="poster" key={p.id} onClick={()=>setLb({type:"image",src:p.src})}>
+              <img src={p.src} loading="lazy" alt="Affiche sponsor"/>
+            </div>)}
+          </div>
+        </>}
       </div></section>
 
       {/* WHY */}
@@ -995,6 +1009,18 @@ function Admin({ data, setData, close }) {
           <img src={it.logo} alt="" style={{maxHeight:64,maxWidth:"90%",objectFit:"contain"}}/></div>}
         {it.logo && <button className="btn btn-ghost btn-sm" onClick={()=>u({logo:""})}><Trash2 size={14}/> Retirer le logo</button>}
         </>}/>}
+
+      {sec==="partners" && <div className="adm-card" style={{marginTop:8}}>
+        <h3>Affiches « Merci sponsor » (format portrait)</h3>
+        <p className="mini" style={{marginBottom:14}}>S'affichent en grille sous les partenaires. Conseillé : images verticales (ex. 1080×1440). Clic = agrandissement sur le site.</p>
+        <ListEditor title="Affiche" items={data.partners.posters||[]} onChange={v=>patch("partners",{posters:v})}
+          blank={{src:""}}
+          render={(it,u)=><>
+            <FileDrop accept="image/*" label="Glisser une affiche (portrait)" onUploaded={url=>u({src:url})}/>
+            {it.src && <div style={{width:120,aspectRatio:"3/4",borderRadius:10,overflow:"hidden",border:"1px solid var(--border)"}}>
+              <img src={it.src} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>}
+          </>}/>
+      </div>}
 
       {sec==="documents" && <ListEditor title="Document" items={data.documents.items} onChange={v=>patch("documents",{items:v})}
         blank={{name:"",desc:"",url:"#"}}
