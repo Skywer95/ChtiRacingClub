@@ -398,8 +398,8 @@ const CSS = `
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;transition:.2s}
 .plogo:hover b{color:var(--primary)}
 .plogo small{color:var(--muted);font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
-.plogo-plate{flex:1;display:grid;place-items:center;background:#fff;border-radius:12px;padding:12px 16px;width:100%;min-height:0;box-shadow:0 4px 14px -8px rgba(0,0,0,.25);transition:transform .25s}
-.plogo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.plogo-plate{flex:1;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:12px;padding:12px 16px;width:100%;min-height:0;overflow:hidden;box-shadow:0 4px 14px -8px rgba(0,0,0,.25);transition:transform .25s}
+.plogo img{width:100%;height:100%;object-fit:contain}
 .plogo:hover .plogo-plate{transform:scale(1.04)}
 .plogo-link{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.65;transition:.2s;line-height:1.2}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
