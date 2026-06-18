@@ -376,11 +376,13 @@ const CSS = `
 
 /* partners */
 .plogos{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.plogo{aspect-ratio:3/2;border:1px solid var(--border);border-radius:14px;background:var(--card);display:grid;place-items:center;text-align:center;padding:14px;transition:.2s;text-decoration:none;color:var(--text)}
+.plogo{aspect-ratio:3/2;border:1px solid var(--border);border-radius:14px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;transition:.2s;text-decoration:none;color:var(--text)}
 .plogo:hover{border-color:var(--primary);transform:translateY(-3px)}
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase}
 .plogo small{color:var(--muted);font-size:11px;margin-top:4px}
 .plogo img{max-width:100%;max-height:72px;width:auto;height:auto;object-fit:contain}
+.plogo-link{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;opacity:.7;transition:.2s}
+.plogo:hover .plogo-link{color:var(--primary);opacity:1}
 
 /* documents */
 .doc{padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center}
@@ -680,6 +682,7 @@ function Site({ data, openAdmin }) {
           {data.partners.items.map(p=><a className="plogo" key={p.id} href={p.url} target="_blank" rel="noreferrer">
             {p.logo ? <img src={p.logo} alt={p.name} loading="lazy"/>
               : <><b>{p.name}</b>{p.category && <small>{p.category}</small>}</>}
+            {p.url && p.url!=="#" && <span className="plogo-link">Cliquer pour accéder au site</span>}
           </a>)}
         </div>
         <p className="mini" style={{ textAlign:"center", margin:"26px 0" }}>{data.partners.footer}</p>
