@@ -380,6 +380,7 @@ const CSS = `
 .plogo:hover{border-color:var(--primary);transform:translateY(-3px)}
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase}
 .plogo small{color:var(--muted);font-size:11px;margin-top:4px}
+.plogo img{max-width:100%;max-height:72px;width:auto;height:auto;object-fit:contain}
 
 /* documents */
 .doc{padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center}
@@ -676,8 +677,9 @@ function Site({ data, openAdmin }) {
         <h2 className="h2">{data.partners.title}</h2>
         <p className="lead" style={{ marginBottom:32 }}>{data.partners.subtitle}</p>
         <div className="plogos">
-          {data.partners.items.map(p=><a className="plogo" key={p.id} href={p.url}>
-            <b>{p.name}</b>{p.category && <small>{p.category}</small>}
+          {data.partners.items.map(p=><a className="plogo" key={p.id} href={p.url} target="_blank" rel="noreferrer">
+            {p.logo ? <img src={p.logo} alt={p.name} loading="lazy"/>
+              : <><b>{p.name}</b>{p.category && <small>{p.category}</small>}</>}
           </a>)}
         </div>
         <p className="mini" style={{ textAlign:"center", margin:"26px 0" }}>{data.partners.footer}</p>
@@ -979,12 +981,17 @@ function Admin({ data, setData, close }) {
           <MediaEditor media={it.media} onChange={m=>u({media:m})}/></>}/>}
 
       {sec==="partners" && <ListEditor title="Partenaire" items={data.partners.items} onChange={v=>patch("partners",{items:v})}
-        blank={{name:"",category:"",url:"#"}}
-        render={(it,u)=><div className="adm-grid">
+        blank={{name:"",category:"",url:"#",logo:""}}
+        render={(it,u)=><><div className="adm-grid">
           <Field label="Nom" value={it.name} onChange={v=>u({name:v})}/>
           <Field label="Catégorie" value={it.category} onChange={v=>u({category:v})}/>
-          <Field label="Lien" value={it.url} onChange={v=>u({url:v})}/>
-        </div>}/>}
+          <Field label="Lien (site du partenaire)" value={it.url} onChange={v=>u({url:v})}/>
+        </div>
+        <FileDrop accept="image/*" label="Glisser le logo (PNG transparent conseillé)" onUploaded={url=>u({logo:url})}/>
+        {it.logo && <div style={{height:80,display:"grid",placeItems:"center",border:"1px solid var(--border)",borderRadius:10,background:"var(--card)",marginBottom:8}}>
+          <img src={it.logo} alt="" style={{maxHeight:64,maxWidth:"90%",objectFit:"contain"}}/></div>}
+        {it.logo && <button className="btn btn-ghost btn-sm" onClick={()=>u({logo:""})}><Trash2 size={14}/> Retirer le logo</button>}
+        </>}/>}
 
       {sec==="documents" && <ListEditor title="Document" items={data.documents.items} onChange={v=>patch("documents",{items:v})}
         blank={{name:"",desc:"",url:"#"}}
