@@ -488,18 +488,25 @@ function ytId(url) {
 }
 
 /* Media component — image / video / youtube, fit cover|contain, poster, lazy, fallback */
-function Media({ media, fit, onClick }) {
+function Media({ media, fit, onClick, bg }) {
   const [err, setErr] = useState(false);
   if (!media || !media.src) return <div className="media"><div className="ph">Média non chargé</div></div>;
   const objectFit = fit || media.fit || "cover";
   const t = media.type || "image";
   if (t === "youtube" || ytId(media.src)) {
     const id = ytId(media.src);
+    if (bg) return <div className="media" style={{ pointerEvents:"none" }}>
+      <iframe title="video" src={`https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&controls=0&playlist=${id}`} style={{ width:"100%", height:"100%", border:0 }} allow="autoplay" />
+    </div>;
     return <div className="media" style={{ aspectRatio: "16/9" }}>
       <iframe title="video" src={`https://www.youtube.com/embed/${id}`} style={{ width:"100%", height:"100%", border:0 }} allowFullScreen />
     </div>;
   }
   if (t === "video") {
+    if (bg) return <div className="media">
+      <video src={media.src} poster={media.poster} autoPlay muted loop playsInline
+        style={{ objectFit, width:"100%", height:"100%" }} />
+    </div>;
     if (onClick) return (
       <div className="media" onClick={onClick}>
         {media.poster ? <img src={media.poster} style={{ objectFit, width:"100%", height:"100%" }} alt="" />
@@ -548,7 +555,7 @@ function Site({ data, openAdmin }) {
 
       {/* HERO */}
       <header id="accueil" className="hero">
-        <div className="hero-media"><Media media={data.hero.media} fit="cover" /></div>
+        <div className="hero-media"><Media media={data.hero.media} fit="cover" bg /></div>
         <div className="speedlines">{[120,90,150,70].map((w,i)=><i key={i} style={{ width:w }} />)}</div>
         <div className="wrap hero-in">
           <div className="eyebrow hero-eyebrow">{data.hero.eyebrow}</div>
@@ -585,7 +592,7 @@ function Site({ data, openAdmin }) {
           </div>
           <a className="btn btn-primary" style={{ marginTop:28 }} onClick={() => go("contact")}>Devenir partenaire <ArrowRight size={18}/></a>
         </div>
-        <Media media={data.association.media} fit="cover" />
+        <Media media={data.association.media} fit="cover" bg />
       </div></section>
 
       {/* CREWS */}
