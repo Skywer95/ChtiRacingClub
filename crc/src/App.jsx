@@ -214,11 +214,13 @@ const DEFAULT_DATA = {
    THÈMES / MODES  — variables CSS
    ============================================================ */
 const THEMES = {
-  blue:  { primary: "#1d4ed8", secondary: "#2563eb", accent: "#0ea5e9" },
-  red:   { primary: "#dc2626", secondary: "#b91c1c", accent: "#f97316" },
-  green: { primary: "#16a34a", secondary: "#15803d", accent: "#65a30d" },
-  gold:  { primary: "#1a1a1a", secondary: "#b8860b", accent: "#d4af37" }
+  blue:     { primary: "#1d4ed8", secondary: "#2563eb", accent: "#0ea5e9" },
+  red:      { primary: "#dc2626", secondary: "#b91c1c", accent: "#f97316" },
+  gold:     { primary: "#1a1a1a", secondary: "#b8860b", accent: "#d4af37" },
+  gradient: { primary: "#4f46e5", secondary: "#7c3aed", accent: "#ec4899",
+              grad: "linear-gradient(120deg,#2563eb 0%,#7c3aed 50%,#ec4899 100%)" }
 };
+const THEME_LABELS = { blue: "Bleu sport", red: "Rouge sport", gold: "Or / Noir", gradient: "Dégradé" };
 const MODES = {
   light: { bg: "#f4f7fb", section: "#ffffff", card: "#ffffff", text: "#0f1b2d", muted: "#5b6b82", border: "#e4eaf2", soft: "#eef3fa", heroOverlay: "rgba(8,18,38,0.45)" },
   night: { bg: "#0d1626", section: "#101d33", card: "#15233e", text: "#e8eef9", muted: "#9fb0cc", border: "#243450", soft: "#16253f", heroOverlay: "rgba(4,9,20,0.6)" }
@@ -227,10 +229,12 @@ function buildVars(general) {
   const t = THEMES[general.theme] || THEMES.blue;
   const m = MODES[general.mode] || MODES.light;
   const c = general.custom || {};
+  const primary = c.primary || t.primary;
   return {
-    "--primary": c.primary || t.primary,
+    "--primary": primary,
     "--secondary": c.secondary || t.secondary,
     "--accent": c.accent || t.accent,
+    "--grad": t.grad || primary,
     "--bg": c.bg || m.bg,
     "--section": c.section || m.section,
     "--card": c.card || m.card,
@@ -261,7 +265,7 @@ const CSS = `
 .lead{color:var(--muted);font-size:18px;margin-top:8px;max-width:640px}
 .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;padding:13px 22px;border-radius:12px;border:none;cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .2s,background .2s;font-family:'Inter'}
 .btn:hover{transform:translateY(-2px)}
-.btn-primary{background:var(--primary);color:#fff;box-shadow:0 8px 22px -8px var(--primary)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 22px -8px var(--primary)}
 .btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
 .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
 .btn-white{background:#fff;color:#0f1b2d}
@@ -276,6 +280,17 @@ const CSS = `
 .nav-links a{font-size:13.5px;font-weight:600;color:var(--text);text-decoration:none;padding:8px 11px;border-radius:8px;text-transform:uppercase;letter-spacing:.02em;transition:.15s}
 .nav-links a:hover{color:var(--primary);background:var(--soft)}
 .nav-right{display:flex;align-items:center;gap:10px}
+.picker-wrap{position:relative}
+.picker-back{position:fixed;inset:0;z-index:60}
+.picker{position:absolute;top:46px;right:0;z-index:61;width:210px;background:var(--section);border:1px solid var(--border);border-radius:14px;box-shadow:0 24px 60px -24px rgba(15,27,45,.5);padding:14px}
+.picker-lab{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:4px 2px 8px}
+.picker-row{display:flex;gap:8px;margin-bottom:6px}
+.chip2{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer}
+.chip2.on{border-color:var(--primary);color:var(--primary)}
+.picker-themes{display:flex;flex-direction:column;gap:6px}
+.swatch{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+.swatch.on{border-color:var(--primary);color:var(--primary)}
+.swatch .dot{width:16px;height:16px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
 .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:var(--section);color:var(--text);cursor:pointer;transition:.15s}
 .icon-btn:hover{border-color:var(--primary);color:var(--primary)}
 .burger{display:none}
@@ -377,11 +392,15 @@ const CSS = `
 
 /* partners */
 .plogos{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:14px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 14px 22px;transition:.2s;text-decoration:none;color:var(--text)}
-.plogo:hover{border-color:var(--primary);transform:translateY(-3px)}
-.plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase}
-.plogo small{color:var(--muted);font-size:11px;margin-top:4px}
-.plogo img{max-width:100%;max-height:72px;width:auto;height:auto;object-fit:contain}
+.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px 16px 24px;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--text);overflow:hidden}
+.plogo::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.plogo:hover{border-color:transparent;transform:translateY(-5px);box-shadow:0 22px 46px -26px rgba(15,27,45,.5)}
+.plogo:hover::before{transform:scaleX(1)}
+.plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;transition:.2s}
+.plogo:hover b{color:var(--primary)}
+.plogo small{color:var(--muted);font-size:11px;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.plogo img{max-width:82%;max-height:66px;width:auto;height:auto;object-fit:contain;filter:grayscale(1);opacity:.7;transition:filter .25s,opacity .25s,transform .25s}
+.plogo:hover img{filter:grayscale(0);opacity:1;transform:scale(1.05)}
 .plogo-link{position:absolute;bottom:7px;left:0;right:0;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.6;transition:.2s}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
 .posters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
@@ -556,8 +575,11 @@ const NAV_ITEMS = [["accueil","Accueil"],["association","Association"],["crews",
 /* ============================================================
    PUBLIC SITE
    ============================================================ */
-function Site({ data, openAdmin }) {
+function Site({ data, openAdmin, view, setView }) {
   const [menu, setMenu] = useState(false);
+  const [pick, setPick] = useState(false);
+  const vTheme = view.theme || data.general.theme;
+  const vMode = view.mode || data.general.mode;
   const [lb, setLb] = useState(null);
   const [filter, setFilter] = useState("tout");
   const go = (id) => { setMenu(false); document.getElementById(id)?.scrollIntoView({ behavior:"smooth" }); };
@@ -577,6 +599,24 @@ function Site({ data, openAdmin }) {
           <a onClick={() => go("contact")} className="btn btn-primary btn-sm" style={{ color:"#fff", textTransform:"uppercase" }}>Devenir sponsor</a>
         </div>
         <div className="nav-right">
+          <div className="picker-wrap">
+            <button className="icon-btn" onClick={() => setPick(p => !p)} title="Apparence"><Palette size={18}/></button>
+            {pick && <>
+              <div className="picker-back" onClick={() => setPick(false)}/>
+              <div className="picker">
+                <div className="picker-lab">Mode</div>
+                <div className="picker-row">
+                  <button className={"chip2"+(vMode==="light"?" on":"")} onClick={()=>setView(v=>({...v,mode:"light"}))}><Sun size={14}/> Clair</button>
+                  <button className={"chip2"+(vMode==="night"?" on":"")} onClick={()=>setView(v=>({...v,mode:"night"}))}><Moon size={14}/> Nuit</button>
+                </div>
+                <div className="picker-lab">Couleurs</div>
+                <div className="picker-themes">
+                  {["blue","red","gold","gradient"].map(k=><button key={k} className={"swatch"+(vTheme===k?" on":"")} onClick={()=>setView(v=>({...v,theme:k}))}>
+                    <span className="dot" style={{background: k==="gradient"?THEMES.gradient.grad:THEMES[k].primary}}/>{THEME_LABELS[k]}</button>)}
+                </div>
+              </div>
+            </>}
+          </div>
           <button className="icon-btn burger" onClick={() => setMenu(m => !m)}>{menu ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div></nav>
@@ -1080,9 +1120,9 @@ function Admin({ data, setData, close }) {
             <button key={k} className={"chip"+(g.mode===k?" on":"")} onClick={()=>patch("general",{mode:k})}><I size={15} style={{verticalAlign:"-2px",marginRight:6}}/>{l}</button>)}
         </div></div>
         <div className="adm-card"><h3>Thème de couleurs</h3><div className="chips">
-          {[["blue","Bleu sport"],["red","Rouge sport"],["green","Vert nature"],["gold","Noir / Or"]].map(([k,l])=>
+          {[["blue","Bleu sport"],["red","Rouge sport"],["gold","Noir / Or"],["gradient","Dégradé"]].map(([k,l])=>
             <button key={k} className={"chip"+(g.theme===k?" on":"")} onClick={()=>patch("general",{theme:k,custom:{}})}>
-              <span style={{display:"inline-block",width:12,height:12,borderRadius:3,background:THEMES[k].primary,marginRight:7,verticalAlign:"-1px"}}/>{l}</button>)}
+              <span style={{display:"inline-block",width:12,height:12,borderRadius:3,background:k==="gradient"?THEMES.gradient.grad:THEMES[k].primary,marginRight:7,verticalAlign:"-1px"}}/>{l}</button>)}
         </div><p className="mini" style={{marginTop:10}}>Choisir un thème réinitialise les couleurs personnalisées ci-dessous.</p></div>
         <div className="adm-card"><h3>Couleurs personnalisées</h3>
           {[["primary","Principale"],["secondary","Secondaire"],["accent","Accent"],["bg","Fond"],["card","Cartes"],["text","Texte"]].map(([k,l])=>{
@@ -1105,15 +1145,23 @@ function Admin({ data, setData, close }) {
 export default function App() {
   const [data, setData] = useState(() => structuredClone(DEFAULT_DATA));
   const [admin, setAdmin] = useState(false);
+  const [view, setView] = useState(() => { try { return JSON.parse(localStorage.getItem("crc:view")) || {}; } catch { return {}; } });
 
   useEffect(() => { storageService.load().then(d => { if (d) setData(d); }); }, []);
   useEffect(() => { if (window.location.hash === "#admin") setAdmin(true); }, []);
+  useEffect(() => { try { localStorage.setItem("crc:view", JSON.stringify(view)); } catch {} }, [view]);
 
-  const vars = buildVars(data.general);
+  const effective = admin ? data.general : {
+    ...data.general,
+    theme: view.theme || data.general.theme,
+    mode: view.mode || data.general.mode,
+    custom: view.theme ? {} : data.general.custom
+  };
+  const vars = buildVars(effective);
   return <div className="crc" style={vars}>
     <style>{CSS}</style>
     {admin
       ? <Admin data={data} setData={setData} close={() => setAdmin(false)} />
-      : <Site data={data} openAdmin={() => setAdmin(true)} />}
+      : <Site data={data} openAdmin={() => setAdmin(true)} view={view} setView={setView} />}
   </div>;
 }
