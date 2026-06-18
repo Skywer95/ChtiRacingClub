@@ -376,12 +376,12 @@ const CSS = `
 
 /* partners */
 .plogos{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.plogo{aspect-ratio:3/2;border:1px solid var(--border);border-radius:14px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;transition:.2s;text-decoration:none;color:var(--text)}
+.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:14px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 14px 22px;transition:.2s;text-decoration:none;color:var(--text)}
 .plogo:hover{border-color:var(--primary);transform:translateY(-3px)}
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase}
 .plogo small{color:var(--muted);font-size:11px;margin-top:4px}
 .plogo img{max-width:100%;max-height:72px;width:auto;height:auto;object-fit:contain}
-.plogo-link{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;opacity:.7;transition:.2s}
+.plogo-link{position:absolute;bottom:7px;left:0;right:0;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.6;transition:.2s}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
 
 /* documents */
