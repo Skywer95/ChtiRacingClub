@@ -398,8 +398,9 @@ const CSS = `
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;transition:.2s}
 .plogo:hover b{color:var(--primary)}
 .plogo small{color:var(--muted);font-size:11px;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
-.plogo img{max-width:90%;max-height:104px;width:auto;height:auto;object-fit:contain;transition:transform .25s}
-.plogo:hover img{transform:scale(1.06)}
+.plogo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .25s}
+.plogo-plate{display:grid;place-items:center;background:#fff;border-radius:12px;padding:14px 18px;width:86%;height:74%;box-shadow:0 4px 14px -8px rgba(0,0,0,.25);transition:transform .25s}
+.plogo:hover .plogo-plate{transform:scale(1.05)}
 .plogo-link{position:absolute;bottom:7px;left:0;right:0;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.6;transition:.2s}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
 .posters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
@@ -460,6 +461,13 @@ const CSS = `
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:12px 22px;border-radius:12px;font-weight:700;z-index:400;box-shadow:0 14px 30px -10px var(--primary)}
 .del{background:#fee2e2;color:#dc2626;border:none;width:34px;height:34px;border-radius:9px;cursor:pointer;display:grid;place-items:center}
 .mini{font-size:12px;color:var(--muted)}
+.media-prev{height:200px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--card);margin-top:4px}
+.media-prev .media{height:100%;width:100%}
+.media-prev.empty{display:grid;place-items:center;color:var(--muted);font-size:13px;background:var(--section);border-style:dashed}
+.login-screen{position:fixed;inset:0;z-index:300;background:var(--bg);display:grid;place-items:center;padding:24px}
+.login-box{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px;text-align:center;box-shadow:0 30px 70px -30px rgba(15,27,45,.5)}
+.login-ic{width:58px;height:58px;border-radius:14px;background:var(--soft);color:var(--primary);display:grid;place-items:center;margin:0 auto 16px}
+.login-box h2{font-style:italic;font-weight:800;text-transform:uppercase;font-size:22px;margin-bottom:6px}
 .filedrop{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;text-align:center;padding:16px;margin-bottom:12px;border:2px dashed var(--border);border-radius:12px;background:var(--section);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
 .filedrop:hover,.filedrop.over{border-color:var(--primary);color:var(--primary);background:var(--soft)}
 
@@ -603,7 +611,7 @@ function PartnerLogo({ p }) {
   } : {};
   return <a className="plogo" href={p.url} target="_blank" rel="noreferrer" style={style}>
     {tint && <span className="plogo-bar" style={{ background: tint }}/>}
-    {p.logo ? <img src={p.logo} alt={p.name} loading="lazy" crossOrigin="anonymous" onLoad={onLoad}/>
+    {p.logo ? <span className="plogo-plate"><img src={p.logo} alt={p.name} loading="lazy" crossOrigin="anonymous" onLoad={onLoad}/></span>
       : <><b>{p.name}</b>{p.category && <small>{p.category}</small>}</>}
     {p.url && p.url !== "#" && <span className="plogo-link">Cliquer pour accéder au site</span>}
   </a>;
@@ -912,6 +920,7 @@ function Field({ label, value, onChange, type="text", textarea }) {
   </div>;
 }
 const STORAGE_BUCKET = "media";
+const ADMIN_PW = "25092007";
 async function uploadFile(file) {
   const ext = (file.name.split(".").pop() || "bin").toLowerCase();
   const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -960,7 +969,9 @@ function MediaEditor({ media, onChange }) {
     <Field label={m.type==="youtube"?"Lien YouTube/Vimeo":"URL du média (ou collez un lien)"} value={m.src} onChange={v=>set("src",v)} />
     {m.type==="video" && <><FileDrop accept="image/*" label="Glisser une image de couverture (poster)" onUploaded={url=>set("poster",url)}/>
       <Field label="URL du poster" value={m.poster} onChange={v=>set("poster",v)} /></>}
-    <div style={{ height:120, borderRadius:10, overflow:"hidden" }}><Media media={m} fit={m.fit}/></div>
+    {m.src
+      ? <div className="media-prev"><Media media={m} fit={m.fit}/></div>
+      : <div className="media-prev empty">Aucun média — glissez un fichier ci-dessus</div>}
   </div>;
 }
 function ListEditor({ title, items, onChange, render, blank }) {
@@ -974,6 +985,26 @@ function ListEditor({ title, items, onChange, render, blank }) {
     </div>)}
     <button className="btn btn-ghost btn-sm" onClick={add}><Plus size={16}/> Ajouter</button>
   </>;
+}
+
+function AdminLogin({ onOk, onCancel }) {
+  const [pw, setPw] = useState("");
+  const [err, setErr] = useState(false);
+  const submit = () => { if (pw === ADMIN_PW) onOk(); else { setErr(true); setPw(""); } };
+  return <div className="login-screen">
+    <div className="login-box">
+      <div className="login-ic"><Lock size={26}/></div>
+      <h2>Espace administrateur</h2>
+      <p className="mini" style={{marginBottom:18}}>Entrez le mot de passe pour gérer le site.</p>
+      <input type="password" autoFocus value={pw} placeholder="Mot de passe"
+        onChange={e=>{setPw(e.target.value);setErr(false);}}
+        onKeyDown={e=>e.key==="Enter"&&submit()}
+        style={{width:"100%",padding:"13px 14px",border:"1px solid var(--border)",borderRadius:10,background:"var(--section)",color:"var(--text)",fontSize:15,marginBottom:err?6:14}}/>
+      {err && <p className="mini" style={{color:"#dc2626",marginBottom:14}}>Mot de passe incorrect.</p>}
+      <button className="btn btn-primary" style={{width:"100%",justifyContent:"center"}} onClick={submit}>Se connecter</button>
+      <button className="btn btn-ghost btn-sm" style={{width:"100%",justifyContent:"center",marginTop:10}} onClick={onCancel}>Retour au site</button>
+    </div>
+  </div>;
 }
 
 function Admin({ data, setData, close }) {
@@ -1184,6 +1215,7 @@ function Admin({ data, setData, close }) {
 export default function App() {
   const [data, setData] = useState(() => structuredClone(DEFAULT_DATA));
   const [admin, setAdmin] = useState(false);
+  const [authed, setAuthed] = useState(() => { try { return sessionStorage.getItem("crc:admin") === "1"; } catch { return false; } });
   const [view, setView] = useState(() => {
     try {
       const v = JSON.parse(localStorage.getItem("crc:view")) || {};
@@ -1207,7 +1239,9 @@ export default function App() {
   return <div className="crc" style={vars}>
     <style>{CSS}</style>
     {admin
-      ? <Admin data={data} setData={setData} close={() => setAdmin(false)} />
+      ? (authed
+          ? <Admin data={data} setData={setData} close={() => setAdmin(false)} />
+          : <AdminLogin onOk={() => { setAuthed(true); try { sessionStorage.setItem("crc:admin","1"); } catch {} }} onCancel={() => setAdmin(false)} />)
       : <Site data={data} openAdmin={() => setAdmin(true)} view={view} setView={setView} />}
   </div>;
 }
