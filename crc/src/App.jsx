@@ -391,17 +391,17 @@ const CSS = `
 
 /* partners */
 .plogos{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 16px 26px;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--text);overflow:hidden}
+.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:18px 16px;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--text);overflow:hidden}
 .plogo-bar{position:absolute;top:0;left:0;right:0;height:4px;transform:scaleX(0);transform-origin:left;transition:transform .3s}
 .plogo:hover{transform:translateY(-5px);box-shadow:0 22px 46px -26px rgba(15,27,45,.5)}
 .plogo:hover .plogo-bar{transform:scaleX(1)}
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;transition:.2s}
 .plogo:hover b{color:var(--primary)}
-.plogo small{color:var(--muted);font-size:11px;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
-.plogo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .25s}
-.plogo-plate{display:grid;place-items:center;background:#fff;border-radius:12px;padding:14px 18px;width:86%;height:74%;box-shadow:0 4px 14px -8px rgba(0,0,0,.25);transition:transform .25s}
-.plogo:hover .plogo-plate{transform:scale(1.05)}
-.plogo-link{position:absolute;bottom:7px;left:0;right:0;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.6;transition:.2s}
+.plogo small{color:var(--muted);font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.plogo-plate{flex:1;display:grid;place-items:center;background:#fff;border-radius:12px;padding:12px 16px;width:100%;min-height:0;box-shadow:0 4px 14px -8px rgba(0,0,0,.25);transition:transform .25s}
+.plogo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.plogo:hover .plogo-plate{transform:scale(1.04)}
+.plogo-link{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.65;transition:.2s;line-height:1.2}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
 .posters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
 .poster{aspect-ratio:3/4;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--border);box-shadow:0 14px 40px -28px rgba(15,27,45,.35);transition:transform .25s,box-shadow .25s}
@@ -809,7 +809,7 @@ function Site({ data, openAdmin, view, setView }) {
         <h2 className="h2">{data.partners.title}</h2>
         <p className="lead" style={{ marginBottom:32 }}>{data.partners.subtitle}</p>
         <div className="plogos">
-          {data.partners.items.map(p=><PartnerLogo key={p.id} p={p}/>)}
+          {data.partners.items.filter(p=>p.logo||p.name).map(p=><PartnerLogo key={p.id} p={p}/>)}
         </div>
         <p className="mini" style={{ textAlign:"center", margin:"22px 0 24px" }}>{data.partners.footer}</p>
         {(data.partners.posters||[]).length>0 &&
