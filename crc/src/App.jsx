@@ -582,6 +582,48 @@ const NAV_ITEMS = [["accueil","Accueil"],["association","Association"],["crews",
    PUBLIC SITE
    ============================================================ */
 /* Logo partenaire : fond teinté auto selon la couleur dominante du logo */
+function ContactForm() {
+  const [f, setF] = useState({ name:"", email:"", phone:"", subject:"", message:"" });
+  const [status, setStatus] = useState("");
+  const set = (k,v) => setF(s => ({ ...s, [k]:v }));
+  const submit = async () => {
+    if (!f.name || !f.email || !f.message) { setStatus("missing"); return; }
+    if (EMAILJS.serviceId.includes("XXXX")) { setStatus("notconfig"); return; }
+    setStatus("sending");
+    try {
+      const r = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          service_id: EMAILJS.serviceId, template_id: EMAILJS.templateId, user_id: EMAILJS.publicKey,
+          template_params: { from_name: f.name, email: f.email, phone: f.phone, subject: f.subject, message: f.message }
+        })
+      });
+      if (r.ok) { setStatus("ok"); setF({ name:"", email:"", phone:"", subject:"", message:"" }); }
+      else setStatus("error");
+    } catch { setStatus("error"); }
+  };
+  return <>
+    <div className="field"><label>Nom / entreprise</label>
+      <input value={f.name} placeholder="Votre nom" onChange={e=>set("name",e.target.value)}/></div>
+    <div className="adm-grid">
+      <div className="field"><label>Email</label>
+        <input type="email" value={f.email} placeholder="email@exemple.fr" onChange={e=>set("email",e.target.value)}/></div>
+      <div className="field"><label>Téléphone</label>
+        <input value={f.phone} placeholder="06 ..." onChange={e=>set("phone",e.target.value)}/></div>
+    </div>
+    <div className="field"><label>Sujet</label>
+      <input value={f.subject} placeholder="Partenariat, presse, info..." onChange={e=>set("subject",e.target.value)}/></div>
+    <div className="field"><label>Message</label>
+      <textarea rows={4} value={f.message} placeholder="Votre message" onChange={e=>set("message",e.target.value)}/></div>
+    <button className="btn btn-primary" disabled={status==="sending"} onClick={submit}>
+      {status==="sending" ? "Envoi en cours…" : "Envoyer le message"} <ArrowRight size={18}/></button>
+    {status==="ok" && <p className="mini" style={{color:"#16a34a",marginTop:12,fontWeight:700}}>Message envoyé, merci ! Nous vous répondrons vite.</p>}
+    {status==="missing" && <p className="mini" style={{color:"#dc2626",marginTop:12}}>Merci de remplir au moins le nom, l'email et le message.</p>}
+    {status==="error" && <p className="mini" style={{color:"#dc2626",marginTop:12}}>Échec de l'envoi. Réessayez ou écrivez-nous directement par email.</p>}
+    {status==="notconfig" && <p className="mini" style={{color:"#dc2626",marginTop:12}}>Formulaire pas encore configuré (EmailJS).</p>}
+  </>;
+}
+
 function PartnerLogo({ p }) {
   const [tint, setTint] = useState(null);
   const onLoad = (e) => {
@@ -851,14 +893,7 @@ function Site({ data, openAdmin, view, setView }) {
           <div className="eyebrow">{data.contact.eyebrow}</div>
           <h2 className="h2">{data.contact.title}</h2>
           <p className="lead" style={{ marginBottom:26 }}>{data.contact.subtitle}</p>
-          <div className="field"><label>Nom / entreprise</label><input placeholder="Votre nom"/></div>
-          <div className="adm-grid">
-            <div className="field"><label>Email</label><input type="email" placeholder="email@exemple.fr"/></div>
-            <div className="field"><label>Téléphone</label><input placeholder="06 ..."/></div>
-          </div>
-          <div className="field"><label>Sujet</label><input placeholder="Partenariat, presse, info..."/></div>
-          <div className="field"><label>Message</label><textarea rows={4} placeholder="Votre message"/></div>
-          <button className="btn btn-primary" onClick={()=>alert("Formulaire de démonstration — à connecter au backend.")}>Envoyer le message <ArrowRight size={18}/></button>
+          <ContactForm />
         </div>
         <div className="cinfo">
           <h3 style={{ fontStyle:"italic", fontWeight:800, textTransform:"uppercase", marginBottom:20 }}>Coordonnées</h3>
@@ -873,8 +908,8 @@ function Site({ data, openAdmin, view, setView }) {
             <a href={g.socials.youtube}><Youtube size={20}/></a>
           </div>
           <div style={{ marginTop:24, borderRadius:16, overflow:"hidden", border:"1px solid var(--border)", aspectRatio:"16/9", position:"relative" }}>
-            <iframe title="map" style={{ width:"100%", height:"100%", border:0, filter:"grayscale(.2)" }}
-              src="https://www.openstreetmap.org/export/embed.html?bbox=1.6,49.9,4.2,51.1&layer=mapnik&marker=50.5,2.9" />
+            <iframe title="map" loading="lazy" style={{ width:"100%", height:"100%", border:0 }}
+              src="https://www.google.com/maps?q=75%20Rue%20Philiomel,%2062190%20Lillers&z=15&output=embed" />
           </div>
         </div>
       </div></section>
@@ -917,6 +952,12 @@ function Field({ label, value, onChange, type="text", textarea }) {
 }
 const STORAGE_BUCKET = "media";
 const ADMIN_PW = "25092007";
+// EmailJS — remplace ces 3 valeurs par les tiennes (voir instructions)
+const EMAILJS = {
+  serviceId:  "service_37bsdzw",
+  templateId: "template_26lm2fa",
+  publicKey:  "pYbB-psoVIQ28Meet"
+};
 async function uploadFile(file) {
   const ext = (file.name.split(".").pop() || "bin").toLowerCase();
   const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
