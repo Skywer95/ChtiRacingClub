@@ -497,6 +497,12 @@ const CSS = `
   .posters{grid-template-columns:repeat(2,1fr)}
   .masonry{columns:1}
   .wrap{padding:0 18px}
+  .table,.table tbody,.table tr,.table td{display:block;width:100%}
+  .table thead{display:none}
+  .table{border:none;background:transparent}
+  .table tr{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:14px;padding:6px 4px;overflow:hidden}
+  .table td{display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:none;padding:10px 16px;text-align:right}
+  .table td::before{content:attr(data-label);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left}
 }
 `;
 
@@ -801,9 +807,11 @@ function Site({ data, openAdmin, view, setView }) {
           <th>Date</th><th>Rallye</th><th>Lieu</th><th>Statut</th><th>Résultat</th>
         </tr></thead><tbody>
           {data.season.events.map(e=><tr key={e.id}>
-            <td style={{ fontWeight:700 }}>{e.date}</td><td>{e.rally}</td><td style={{ color:"var(--muted)" }}>{e.place}</td>
-            <td><span className={"badge "+e.status}>{e.status==="avenir"?"À venir":e.status==="inscrit"?"Inscrit":"Terminé"}</span></td>
-            <td style={{ color:"var(--muted)" }}>{e.result || "—"}</td>
+            <td data-label="Date" style={{ fontWeight:700 }}>{e.date}</td>
+            <td data-label="Rallye">{e.rally}</td>
+            <td data-label="Lieu" style={{ color:"var(--muted)" }}>{e.place}</td>
+            <td data-label="Statut"><span className={"badge "+e.status}>{e.status==="avenir"?"À venir":e.status==="inscrit"?"Inscrit":"Terminé"}</span></td>
+            <td data-label="Résultat" style={{ color:"var(--muted)" }}>{e.result || "—"}</td>
           </tr>)}
         </tbody></table>
       </div></section>
