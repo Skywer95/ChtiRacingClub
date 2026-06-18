@@ -691,16 +691,14 @@ function Site({ data, openAdmin }) {
             {p.url && p.url!=="#" && <span className="plogo-link">Cliquer pour accéder au site</span>}
           </a>)}
         </div>
-        <p className="mini" style={{ textAlign:"center", margin:"26px 0" }}>{data.partners.footer}</p>
-        {(data.partners.posters||[]).length>0 && <>
-          <p className="lead" style={{ textAlign:"center", margin:"36px auto 22px" }}>Merci à nos sponsors 🏁</p>
+        <p className="mini" style={{ textAlign:"center", margin:"22px 0 24px" }}>{data.partners.footer}</p>
+        {(data.partners.posters||[]).length>0 &&
           <div className="posters">
             {(data.partners.posters||[]).map(p=><div className="poster" key={p.id} onClick={()=>setLb({type:"image",src:p.src})}>
               <img src={p.src} loading="lazy" alt="Affiche sponsor"/>
             </div>)}
-          </div>
-        </>}
-        <div style={{ textAlign:"center", marginTop:40 }}><a className="btn btn-primary" onClick={()=>go("contact")}>Devenir partenaire <Handshake size={18}/></a></div>
+          </div>}
+        <div style={{ textAlign:"center", marginTop:32 }}><a className="btn btn-primary" onClick={()=>go("contact")}>Devenir partenaire <Handshake size={18}/></a></div>
       </div></section>
 
       {/* WHY */}
