@@ -10,20 +10,35 @@ import {
 /* ============================================================
    STORAGE SERVICE  — couche isolée. Remplacer par Supabase/Firebase ici.
    ============================================================ */
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://awmrfsyhdwjmysbooitr.supabase.co",
+  "sb_publishable_SOf_pu2jKn2EKZ_Uyqjamw_QcwbIfjE"
+);
+
 const STORE_KEY = "crc:data:v1";
 const storageService = {
   async load() {
-    try { const v = localStorage.getItem(STORE_KEY); return v ? JSON.parse(v) : null; }
-    catch { return null; }
+    try {
+      const { data, error } = await supabase
+        .from("site_data").select("value").eq("key", STORE_KEY).maybeSingle();
+      if (error) { console.error("Supabase load:", error.message); return null; }
+      return data ? data.value : null;
+    } catch (e) { console.error(e); return null; }
   },
   async save(data) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); return true; }
-    catch { return false; }
+    try {
+      const { error } = await supabase.from("site_data")
+        .upsert({ key: STORE_KEY, value: data, updated_at: new Date().toISOString() });
+      if (error) { console.error("Supabase save:", error.message); return false; }
+      return true;
+    } catch (e) { console.error(e); return false; }
   },
   async clear() {
-    try { localStorage.removeItem(STORE_KEY); } catch {}
+    try { await supabase.from("site_data").delete().eq("key", STORE_KEY); } catch {}
   }
-}
+};
 
 /* ============================================================
    DONNÉES PAR DÉFAUT  — tout le contenu du site vit ici.
