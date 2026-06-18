@@ -214,13 +214,11 @@ const DEFAULT_DATA = {
    THÈMES / MODES  — variables CSS
    ============================================================ */
 const THEMES = {
-  blue:     { primary: "#1d4ed8", secondary: "#2563eb", accent: "#0ea5e9" },
-  red:      { primary: "#dc2626", secondary: "#b91c1c", accent: "#f97316" },
-  gold:     { primary: "#1a1a1a", secondary: "#b8860b", accent: "#d4af37" },
-  gradient: { primary: "#4f46e5", secondary: "#7c3aed", accent: "#ec4899",
-              grad: "linear-gradient(120deg,#2563eb 0%,#7c3aed 50%,#ec4899 100%)" }
+  blue: { primary: "#1d4ed8", secondary: "#2563eb", accent: "#0ea5e9", grad: "linear-gradient(120deg,#2563eb 0%,#0ea5e9 100%)" },
+  red:  { primary: "#dc2626", secondary: "#b91c1c", accent: "#f97316", grad: "linear-gradient(120deg,#dc2626 0%,#f97316 100%)" },
+  gold: { primary: "#1a1a1a", secondary: "#b8860b", accent: "#d4af37", grad: "linear-gradient(120deg,#1a1a1a 0%,#d4af37 100%)" }
 };
-const THEME_LABELS = { blue: "Bleu sport", red: "Rouge sport", gold: "Or / Noir", gradient: "Dégradé" };
+const THEME_LABELS = { blue: "Bleu sport", red: "Rouge sport", gold: "Or / Noir" };
 const MODES = {
   light: { bg: "#f4f7fb", section: "#ffffff", card: "#ffffff", text: "#0f1b2d", muted: "#5b6b82", border: "#e4eaf2", soft: "#eef3fa", heroOverlay: "rgba(8,18,38,0.45)" },
   night: { bg: "#0d1626", section: "#101d33", card: "#15233e", text: "#e8eef9", muted: "#9fb0cc", border: "#243450", soft: "#16253f", heroOverlay: "rgba(4,9,20,0.6)" }
@@ -234,7 +232,7 @@ function buildVars(general) {
     "--primary": primary,
     "--secondary": c.secondary || t.secondary,
     "--accent": c.accent || t.accent,
-    "--grad": t.grad || primary,
+    "--grad": general.gradient ? t.grad : primary,
     "--bg": c.bg || m.bg,
     "--section": c.section || m.section,
     "--card": c.card || m.card,
@@ -291,6 +289,7 @@ const CSS = `
 .swatch{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;text-align:left}
 .swatch.on{border-color:var(--primary);color:var(--primary)}
 .swatch .dot{width:16px;height:16px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.grad-toggle{margin-top:8px;width:100%}
 .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:var(--section);color:var(--text);cursor:pointer;transition:.15s}
 .icon-btn:hover{border-color:var(--primary);color:var(--primary)}
 .burger{display:none}
@@ -392,15 +391,15 @@ const CSS = `
 
 /* partners */
 .plogos{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px 16px 24px;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--text);overflow:hidden}
-.plogo::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform .3s}
-.plogo:hover{border-color:transparent;transform:translateY(-5px);box-shadow:0 22px 46px -26px rgba(15,27,45,.5)}
-.plogo:hover::before{transform:scaleX(1)}
+.plogo{position:relative;aspect-ratio:3/2;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 16px 26px;transition:transform .25s,box-shadow .25s,border-color .25s;text-decoration:none;color:var(--text);overflow:hidden}
+.plogo-bar{position:absolute;top:0;left:0;right:0;height:4px;transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.plogo:hover{transform:translateY(-5px);box-shadow:0 22px 46px -26px rgba(15,27,45,.5)}
+.plogo:hover .plogo-bar{transform:scaleX(1)}
 .plogo b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;transition:.2s}
 .plogo:hover b{color:var(--primary)}
 .plogo small{color:var(--muted);font-size:11px;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
-.plogo img{max-width:82%;max-height:66px;width:auto;height:auto;object-fit:contain;filter:grayscale(1);opacity:.7;transition:filter .25s,opacity .25s,transform .25s}
-.plogo:hover img{filter:grayscale(0);opacity:1;transform:scale(1.05)}
+.plogo img{max-width:90%;max-height:104px;width:auto;height:auto;object-fit:contain;transition:transform .25s}
+.plogo:hover img{transform:scale(1.06)}
 .plogo-link{position:absolute;bottom:7px;left:0;right:0;font-size:8.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;opacity:.6;transition:.2s}
 .plogo:hover .plogo-link{color:var(--primary);opacity:1}
 .posters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
@@ -575,11 +574,47 @@ const NAV_ITEMS = [["accueil","Accueil"],["association","Association"],["crews",
 /* ============================================================
    PUBLIC SITE
    ============================================================ */
+/* Logo partenaire : fond teinté auto selon la couleur dominante du logo */
+function PartnerLogo({ p }) {
+  const [tint, setTint] = useState(null);
+  const onLoad = (e) => {
+    try {
+      const im = e.target, n = 32, c = document.createElement("canvas");
+      c.width = n; c.height = n;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(im, 0, 0, n, n);
+      const d = ctx.getImageData(0, 0, n, n).data;
+      let r = 0, g = 0, b = 0, cnt = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        const a = d[i+3]; if (a < 130) continue;
+        const rr = d[i], gg = d[i+1], bb = d[i+2];
+        const mx = Math.max(rr,gg,bb), mn = Math.min(rr,gg,bb);
+        if (mx > 244 && mn > 244) continue;       // ignore le blanc
+        if (mx < 18) continue;                      // ignore le noir pur
+        if (mx - mn < 18 && mx > 150) continue;     // ignore les gris clairs
+        r += rr; g += gg; b += bb; cnt++;
+      }
+      if (cnt > 4) setTint(`rgb(${r/cnt|0},${g/cnt|0},${b/cnt|0})`);
+    } catch {}
+  };
+  const style = tint ? {
+    background: `color-mix(in srgb, ${tint} 14%, var(--card))`,
+    borderColor: `color-mix(in srgb, ${tint} 30%, var(--border))`
+  } : {};
+  return <a className="plogo" href={p.url} target="_blank" rel="noreferrer" style={style}>
+    {tint && <span className="plogo-bar" style={{ background: tint }}/>}
+    {p.logo ? <img src={p.logo} alt={p.name} loading="lazy" crossOrigin="anonymous" onLoad={onLoad}/>
+      : <><b>{p.name}</b>{p.category && <small>{p.category}</small>}</>}
+    {p.url && p.url !== "#" && <span className="plogo-link">Cliquer pour accéder au site</span>}
+  </a>;
+}
+
 function Site({ data, openAdmin, view, setView }) {
   const [menu, setMenu] = useState(false);
   const [pick, setPick] = useState(false);
   const vTheme = view.theme || data.general.theme;
   const vMode = view.mode || data.general.mode;
+  const vGrad = view.gradient !== undefined ? view.gradient : !!data.general.gradient;
   const [lb, setLb] = useState(null);
   const [filter, setFilter] = useState("tout");
   const go = (id) => { setMenu(false); document.getElementById(id)?.scrollIntoView({ behavior:"smooth" }); };
@@ -611,9 +646,12 @@ function Site({ data, openAdmin, view, setView }) {
                 </div>
                 <div className="picker-lab">Couleurs</div>
                 <div className="picker-themes">
-                  {["blue","red","gold","gradient"].map(k=><button key={k} className={"swatch"+(vTheme===k?" on":"")} onClick={()=>setView(v=>({...v,theme:k}))}>
-                    <span className="dot" style={{background: k==="gradient"?THEMES.gradient.grad:THEMES[k].primary}}/>{THEME_LABELS[k]}</button>)}
+                  {["blue","red","gold"].map(k=><button key={k} className={"swatch"+(vTheme===k?" on":"")} onClick={()=>setView(v=>({...v,theme:k}))}>
+                    <span className="dot" style={{background:THEMES[k].primary}}/>{THEME_LABELS[k]}</button>)}
                 </div>
+                <button className={"swatch grad-toggle"+(vGrad?" on":"")} onClick={()=>setView(v=>({...v,gradient:!vGrad}))}>
+                  <span className="dot" style={{background:THEMES[vTheme].grad}}/>Dégradé {vGrad ? "activé" : "désactivé"}
+                </button>
               </div>
             </>}
           </div>
@@ -763,11 +801,7 @@ function Site({ data, openAdmin, view, setView }) {
         <h2 className="h2">{data.partners.title}</h2>
         <p className="lead" style={{ marginBottom:32 }}>{data.partners.subtitle}</p>
         <div className="plogos">
-          {data.partners.items.map(p=><a className="plogo" key={p.id} href={p.url} target="_blank" rel="noreferrer">
-            {p.logo ? <img src={p.logo} alt={p.name} loading="lazy"/>
-              : <><b>{p.name}</b>{p.category && <small>{p.category}</small>}</>}
-            {p.url && p.url!=="#" && <span className="plogo-link">Cliquer pour accéder au site</span>}
-          </a>)}
+          {data.partners.items.map(p=><PartnerLogo key={p.id} p={p}/>)}
         </div>
         <p className="mini" style={{ textAlign:"center", margin:"22px 0 24px" }}>{data.partners.footer}</p>
         {(data.partners.posters||[]).length>0 &&
@@ -1120,10 +1154,15 @@ function Admin({ data, setData, close }) {
             <button key={k} className={"chip"+(g.mode===k?" on":"")} onClick={()=>patch("general",{mode:k})}><I size={15} style={{verticalAlign:"-2px",marginRight:6}}/>{l}</button>)}
         </div></div>
         <div className="adm-card"><h3>Thème de couleurs</h3><div className="chips">
-          {[["blue","Bleu sport"],["red","Rouge sport"],["gold","Noir / Or"],["gradient","Dégradé"]].map(([k,l])=>
+          {[["blue","Bleu sport"],["red","Rouge sport"],["gold","Noir / Or"]].map(([k,l])=>
             <button key={k} className={"chip"+(g.theme===k?" on":"")} onClick={()=>patch("general",{theme:k,custom:{}})}>
-              <span style={{display:"inline-block",width:12,height:12,borderRadius:3,background:k==="gradient"?THEMES.gradient.grad:THEMES[k].primary,marginRight:7,verticalAlign:"-1px"}}/>{l}</button>)}
-        </div><p className="mini" style={{marginTop:10}}>Choisir un thème réinitialise les couleurs personnalisées ci-dessous.</p></div>
+              <span style={{display:"inline-block",width:12,height:12,borderRadius:3,background:THEMES[k].primary,marginRight:7,verticalAlign:"-1px"}}/>{l}</button>)}
+        </div>
+        <div className="chips" style={{marginTop:12}}>
+          <button className={"chip"+(g.gradient?" on":"")} onClick={()=>patch("general",{gradient:!g.gradient})}>
+            <span style={{display:"inline-block",width:12,height:12,borderRadius:3,background:(THEMES[g.theme]||THEMES.blue).grad,marginRight:7,verticalAlign:"-1px"}}/>Dégradé {g.gradient?"activé":"désactivé"}</button>
+        </div>
+        <p className="mini" style={{marginTop:10}}>Choisir un thème réinitialise les couleurs personnalisées ci-dessous.</p></div>
         <div className="adm-card"><h3>Couleurs personnalisées</h3>
           {[["primary","Principale"],["secondary","Secondaire"],["accent","Accent"],["bg","Fond"],["card","Cartes"],["text","Texte"]].map(([k,l])=>{
             const cur = buildVars(g)["--"+k];
@@ -1155,6 +1194,7 @@ export default function App() {
     ...data.general,
     theme: view.theme || data.general.theme,
     mode: view.mode || data.general.mode,
+    gradient: view.gradient !== undefined ? view.gradient : data.general.gradient,
     custom: view.theme ? {} : data.general.custom
   };
   const vars = buildVars(effective);
