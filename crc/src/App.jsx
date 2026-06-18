@@ -692,15 +692,15 @@ function Site({ data, openAdmin }) {
           </a>)}
         </div>
         <p className="mini" style={{ textAlign:"center", margin:"26px 0" }}>{data.partners.footer}</p>
-        <div style={{ textAlign:"center" }}><a className="btn btn-primary" onClick={()=>go("contact")}>Devenir partenaire <Handshake size={18}/></a></div>
         {(data.partners.posters||[]).length>0 && <>
-          <p className="lead" style={{ textAlign:"center", margin:"48px auto 22px" }}>Merci à nos sponsors 🏁</p>
+          <p className="lead" style={{ textAlign:"center", margin:"36px auto 22px" }}>Merci à nos sponsors 🏁</p>
           <div className="posters">
             {(data.partners.posters||[]).map(p=><div className="poster" key={p.id} onClick={()=>setLb({type:"image",src:p.src})}>
               <img src={p.src} loading="lazy" alt="Affiche sponsor"/>
             </div>)}
           </div>
         </>}
+        <div style={{ textAlign:"center", marginTop:40 }}><a className="btn btn-primary" onClick={()=>go("contact")}>Devenir partenaire <Handshake size={18}/></a></div>
       </div></section>
 
       {/* WHY */}
