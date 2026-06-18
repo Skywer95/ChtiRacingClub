@@ -489,6 +489,33 @@ function ytId(url) {
 }
 
 /* Media component — image / video / youtube, fit cover|contain, poster, lazy, fallback */
+/* Diaporama hero : vidéos/images qui s'enchaînent en boucle */
+function HeroSlides({ slides }) {
+  const [i, setI] = useState(0);
+  const next = useCallback(() => setI(p => (p + 1) % slides.length), [slides.length]);
+  const cur = slides[i];
+  const single = slides.length === 1;
+  useEffect(() => {
+    if (!cur || single) return;
+    const isVid = cur.type === "video" && !ytId(cur.src);
+    if (!isVid) { const t = setTimeout(next, ytId(cur.src) ? 14000 : 6000); return () => clearTimeout(t); }
+  }, [i, cur, next, single]);
+  if (!cur) return null;
+  const fit = cur.fit || "cover";
+  const id = ytId(cur.src);
+  let el;
+  if (cur.type === "video" && !id) {
+    el = <video key={i} src={cur.src} poster={cur.poster} autoPlay muted playsInline loop={single}
+      onEnded={single ? undefined : next} style={{ width:"100%", height:"100%", objectFit:fit }} />;
+  } else if (id) {
+    el = <iframe key={i} title="hero" src={`https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=${single?1:0}&playlist=${id}`}
+      style={{ width:"100%", height:"100%", border:0, pointerEvents:"none" }} allow="autoplay" />;
+  } else {
+    el = <img key={i} src={cur.src} alt="" style={{ width:"100%", height:"100%", objectFit:fit }} />;
+  }
+  return <div className="media" style={{ position:"absolute", inset:0 }}>{el}</div>;
+}
+
 function Media({ media, fit, onClick, bg }) {
   const [err, setErr] = useState(false);
   if (!media || !media.src) return <div className="media"><div className="ph">Média non chargé</div></div>;
@@ -556,7 +583,10 @@ function Site({ data, openAdmin }) {
 
       {/* HERO */}
       <header id="accueil" className="hero">
-        <div className="hero-media"><Media media={data.hero.media} fit="cover" bg /></div>
+        <div className="hero-media">{(() => {
+          const slides = (data.hero.slides || []).filter(s => s && s.src);
+          return slides.length ? <HeroSlides slides={slides} /> : <Media media={data.hero.media} fit="cover" bg />;
+        })()}</div>
         <div className="speedlines">{[120,90,150,70].map((w,i)=><i key={i} style={{ width:w }} />)}</div>
         <div className="wrap hero-in">
           <div className="eyebrow hero-eyebrow">{data.hero.eyebrow}</div>
@@ -922,8 +952,15 @@ function Admin({ data, setData, close }) {
           <Field label="Eyebrow" value={data.hero.eyebrow} onChange={v=>patch("hero",{eyebrow:v})}/>
           <Field label="Slogan" value={data.hero.slogan} onChange={v=>patch("hero",{slogan:v})} textarea/>
         </div>
-        <div className="adm-card"><h3>Média de fond (image ou vidéo)</h3>
+        <div className="adm-card"><h3>Média de fond (si aucun diaporama ci-dessous)</h3>
           <MediaEditor media={data.hero.media} onChange={m=>patch("hero",{media:m})}/></div>
+        <div className="adm-card">
+          <h3>Diaporama de fond (s'enchaînent en boucle)</h3>
+          <p className="mini" style={{marginBottom:14}}>Ajoute plusieurs vidéos/images : elles défilent automatiquement. Les vidéos s'enchaînent à la fin, les images durent 6 s. Si vide, c'est le média de fond ci-dessus qui est utilisé.</p>
+          <ListEditor title="Média" items={data.hero.slides||[]} onChange={v=>patch("hero",{slides:v})}
+            blank={{type:"video",src:"",fit:"cover",poster:""}}
+            render={(it,u)=><MediaEditor media={it} onChange={m=>u(m)}/>}/>
+        </div>
         <ListEditor title="Stat" items={data.hero.stats.map((s,i)=>({...s,id:s.id||"st"+i}))}
           onChange={v=>patch("hero",{stats:v})} blank={{icon:"shield",title:"",text:""}}
           render={(it,u)=><div className="adm-grid">
