@@ -612,8 +612,8 @@ function PartnerLogo({ p }) {
 function Site({ data, openAdmin, view, setView }) {
   const [menu, setMenu] = useState(false);
   const [pick, setPick] = useState(false);
-  const vTheme = view.theme || data.general.theme;
-  const vMode = view.mode || data.general.mode;
+  const vTheme = THEMES[view.theme] ? view.theme : (THEMES[data.general.theme] ? data.general.theme : "blue");
+  const vMode = (view.mode || data.general.mode) === "night" ? "night" : "light";
   const vGrad = view.gradient !== undefined ? view.gradient : !!data.general.gradient;
   const [lb, setLb] = useState(null);
   const [filter, setFilter] = useState("tout");
@@ -650,7 +650,7 @@ function Site({ data, openAdmin, view, setView }) {
                     <span className="dot" style={{background:THEMES[k].primary}}/>{THEME_LABELS[k]}</button>)}
                 </div>
                 <button className={"swatch grad-toggle"+(vGrad?" on":"")} onClick={()=>setView(v=>({...v,gradient:!vGrad}))}>
-                  <span className="dot" style={{background:THEMES[vTheme].grad}}/>Dégradé {vGrad ? "activé" : "désactivé"}
+                  <span className="dot" style={{background:(THEMES[vTheme]||THEMES.blue).grad}}/>Dégradé {vGrad ? "activé" : "désactivé"}
                 </button>
               </div>
             </>}
@@ -1184,7 +1184,13 @@ function Admin({ data, setData, close }) {
 export default function App() {
   const [data, setData] = useState(() => structuredClone(DEFAULT_DATA));
   const [admin, setAdmin] = useState(false);
-  const [view, setView] = useState(() => { try { return JSON.parse(localStorage.getItem("crc:view")) || {}; } catch { return {}; } });
+  const [view, setView] = useState(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem("crc:view")) || {};
+      if (v.theme && !THEMES[v.theme]) delete v.theme;
+      return v;
+    } catch { return {}; }
+  });
 
   useEffect(() => { storageService.load().then(d => { if (d) setData(d); }); }, []);
   useEffect(() => { if (window.location.hash === "#admin") setAdmin(true); }, []);
